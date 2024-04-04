@@ -1,0 +1,107 @@
+import React, { useState, useEffect } from 'react';
+import BackButton from '../components/BackButton';
+import Spinner from '../components/Spinner';
+import axios from 'axios';
+import { useNavigate, useParams } from 'react-router-dom';
+import { useSnackbar } from 'notistack';
+
+const EditDetail = () => {
+  const [name, setName] = useState('');
+  const [phone_number, setPhone_number] = useState('');
+  const [email, setEmail] = useState('');
+  const [hobbies, setHobbies] = useState('');
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+  const {id} = useParams();
+  //const { enqueueSnackbar } = useSnackbar();
+
+  useEffect(() => {
+    setLoading(true);
+    axios.get(`https://mernprojectbackend-1-9ko5.onrender.com/details/${id}`)
+    .then((response) => {
+      setName(response.data.name);
+      setPhone_number(response.data.phone_number)
+      setEmail(response.data.email)
+      setHobbies(response.data.hobbies);
+      setLoading(false);
+      }).catch((error) => {
+        setLoading(false);
+        alert('An error happened. Please Check console');
+        console.log(error);
+      });
+  }, [])
+  
+  const handleEditDetail = () => {
+    const data = {
+      name,
+      phone_number,
+      email,
+      hobbies,
+    };
+    setLoading(true);
+    axios
+      .put(`http://localhost:5555/details/${id}`, data)
+      .then(() => {
+        setLoading(false);
+        enqueueSnackbar('Edited successfully', { variant: 'success' });
+        navigate('/');
+      })
+      .catch((error) => {
+        setLoading(false);
+
+        enqueueSnackbar('Error', { variant: 'error' });
+        console.log(error);
+      });
+  };
+
+  return (
+    <div className='p-4 h-screen bg-gradient-to-br from-blue-500 to-purple-600'>
+      <BackButton />
+      <h1 className='text-3xl my-4 text-white'>Edit detail</h1>
+      {loading ? <Spinner /> : ''}
+      <div className='flex flex-col border-2 border-sky-400 rounded-xl w-[600px] p-4 mx-auto bg-white bg-opacity-70'>
+        <div className='my-4'>
+        <label className='text-xl mr-4 text-gray-500'>Name</label>
+          <input
+            type='text'
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            className='border-2 border-gray-500 px-4 py-2 w-full'
+          />
+        </div>
+        <div className='my-4'>
+          <label className='text-xl mr-4 text-gray-500'>phone number</label>
+          <input
+            type='tel'
+            value={phone_number}
+            onChange={(e) => setPhone_number(e.target.value)}
+            className='border-2 border-gray-500 px-4 py-2  w-full '
+          />
+        </div>
+        <div className='my-4'>
+          <label className='text-xl mr-4 text-gray-500'>email</label>
+          <input
+            type='email'
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className='border-2 border-gray-500 px-4 py-2  w-full '
+          />
+        </div>
+        <div className='my-4'>
+          <label className='text-xl mr-4 text-gray-500'>Hobbies</label>
+          <input
+            type='text'
+            value={hobbies}
+            onChange={(e) => setHobbies(e.target.value)}
+            className='border-2 border-gray-500 px-4 py-2  w-full '
+          />
+        </div>
+        <button className='p-2 bg-sky-300 m-8' onClick={handleEditDetail}>
+          Save
+        </button>
+      </div>
+    </div>
+  )
+}
+
+export default EditDetail;
